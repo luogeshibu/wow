@@ -5,7 +5,7 @@
 #    exit 1
 #fi
 
-##sudo user or root user!
+####sudo user or root user!
 
 # check your system...
 if [ $(command -v apt-get) ]
