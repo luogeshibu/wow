@@ -1,21 +1,23 @@
 #!/bin/bash
 ###This shell script is for root user. you should have root permission.
-if [ `id -u` != "0" ]; then
-    echo "Sorry, you are not root."
-    exit 1
-fi
+#if [ `id -u` != "0" ]; then
+#    echo "Sorry, you are not root."
+#    exit 1
+#fi
+
+##sudo user or root user!
 
 # check your system...
 if [ $(command -v apt-get) ]
 then
   # install net-tools zsh
-  apt-get update
-  apt-get install -y net-tools zsh curl tree git vim
+  sudo apt-get update
+  sudo apt-get install -y net-tools zsh curl tree git vim
 elif [ $(command -v yum) ]
 then
   # install net-tools zsh
-  yum -y update
-  yum -y install net-tools zsh curl tree git
+  sudo yum -y update
+  sudo yum -y install net-tools zsh curl tree git
 else
   echo -e " 
   This shell script is not working on your system. (-_-) 
@@ -41,7 +43,7 @@ fi
 
 ###########################only use this other user#############################################3
 #clean old configurtion.
-cd ; rm -rf .oh-my-zsh/ ;  rm -rf ./.zshrc
+cd ; sudo rm -rf .oh-my-zsh/ ; sudo rm -rf ./.zshrc
 # install oh-my-zsh from github and install some useful plugins.
 yes | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
