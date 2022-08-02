@@ -3,5 +3,4 @@ Some personal tiny shell or python scripts. Thanks for your contribution for thi
 
 luogeshibu@gmail.com
 
-
-your add new commit
+luogeyuxi
