@@ -25,21 +25,14 @@ else
   " && exit 2
 fi
 
-#apt-get -v &> /dev/null && apt-get update || yum update
-#echo root:1347808093Shibu | chpasswd
-#echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
-#systemctl restart sshd
-
-# setting system time zone
-#sudo timedatectl set-timezone Asia/Chongqing
 
 ###########setting oh my zsh################
 
-
 [ $? -ne 0 ] && echo "your linux repo setting is right or not? can not install stuff." && exit 3
+
 #setting git config
-#git config --global user.name "luogeshibu"
-#git config --global user.email "luogeshibu@gmail.com"
+git config --global user.name "luogeshibu"
+git config --global user.email "luogeshibu@gmail.com"
 
 ###########################only use this other user#############################################3
 #clean old configurtion.
@@ -50,8 +43,8 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
 # setting .zshrc file default values
-sed -i 's/(git)/(git zsh-autosuggestions  zsh-syntax-highlighting)/g' ./.zshrc
-sed -i 's/robbyrussell/aussiegeek/g' ./.zshrc
+sudo sed -i 's/(git)/(git zsh-autosuggestions  zsh-syntax-highlighting)/g' ./.zshrc
+sudo sed -i 's/robbyrussell/aussiegeek/g' ./.zshrc
 echo "export EDITOR='vim'" >> ./.zshrc
 echo "export VISUAL='vim'" >> ./.zshrc
 #echo "neofetch" >> ./.zshrc
