@@ -1,0 +1,85 @@
+FROM ubuntu:18.04
+LABEL maintainer "shibu.luoge@harman.com"
+ARG DEBIAN_FRONTEND=noninteractive
+##
+ARG gradle_version=5.4.1
+ARG sdk_version=sdk-tools-linux-3859397.zip
+ARG android_home=/opt/android/sdk
+# Basic
+RUN apt-get update && dpkg --add-architecture i386 && apt-get update
+RUN apt-get install -y xxd apt-utils openjdk-8-jdk iputils-ping autoconf openssh-server bsdmainutils simg2img
+# Google
+RUN apt-get install -y  git-core sudo vim gnupg libart-2.0-2 libcapstone-dev flex bison gperf build-essential zip curl \
+                        zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev \
+                        libx11-dev lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc unzip \
+                        xvfb lib32z1 lib32stdc++6 \
+                        libcurl4-openssl-dev libglu1-mesa libxi-dev libxmu-dev libglu1-mesa-dev \
+                        git mercurial xvfb locales openssh-client ca-certificates tar gzip parallel \
+                        net-tools netcat bzip2   
+# Supplement
+RUN apt-get install -y  python-pip python-dev python-networkx libxml-simple-perl \
+                        libssl-dev bc liblz4-tool rsync kmod \
+                        cpio libglu1 libpulse-dev libasound2 \
+                        libc6 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 \
+                        libxcursor1 libxi6 libxtst6 libnss3 wget
+# harman setting up 
+RUN apt-get install -y  zlib1g-dev x11proto-core-dev \
+                        lib32ncurses5-dev lib32ncurses5 lib32z1 \
+                        lib32z1-dev libpython2.7-stdlib ccache libreadline-dev:i386 \
+                        libgl1-mesa-dev tofrodos python-markdown libxml2-utils \
+                        zlib1g-dev:i386 zlib1g:i386 squashfs-tools bc ccache tesseract-ocr \
+                        imagemagick gettext python-libxml2 unzip dosfstools mtools \
+                        dos2unix python-mako liblz4-tool \
+                        minizip subversion texinfo python-pystache 
+RUN ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so && pip install --user cryptography && apt-get install -y libxkbcommon-x11-0 git-lfs
+RUN pip2 install    asn1crypto bcrypt certifi cffi chardet cryptography dateutils dnspython ecdsa enum34 Fabric idna ipaddress IPy jenkins Jinja2 jmespath \
+                    keyring keyrings.alt Mako MarkupSafe multi-key-dict ndg-httpsclient paramiko pbr pexpect pip prettytable psutil ptyprocess pyaml pyasn1 \
+                    pycparser pycrypto pygerrit pygobject PyNaCl pyOpenSSL python-dateutil python-jenkins pytz pyxdg PyYAML requests SecretStorage setuptools \
+                    six subprocess32 template toml urllib3 virtualenv wheel ninja
+# Download and install gradle
+RUN wget https://services.gradle.org/distributions/gradle-${gradle_version}-bin.zip -P /tmp \
+    && unzip -d /opt/gradle /tmp/gradle-${gradle_version}-bin.zip \
+    && mkdir /opt/gradlew \
+    && /opt/gradle/gradle-${gradle_version}/bin/gradle wrapper --gradle-version ${gradle_version} --distribution-type all -p /opt/gradlew  \
+    && /opt/gradle/gradle-${gradle_version}/bin/gradle wrapper -p /opt/gradlew \
+    && rm /tmp/gradle-${gradle_version}-bin.zip
+# Download and install Android SDK
+RUN sudo mkdir -p ${android_home} && \
+    curl --silent --show-error --location --fail --retry 3 --output /tmp/${sdk_version} https://dl.google.com/android/repository/${sdk_version} && \
+    unzip -q /tmp/${sdk_version} -d ${android_home} && \
+    rm /tmp/${sdk_version}
+# Set environmental variables
+ENV GRADLE_HOME=/opt/gradle/gradle-$gradle_version 
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+ENV ANDROID_HOME ${android_home}
+ENV ADB_INSTALL_TIMEOUT 120
+ENV PATH=${JAVA_HOME}/bin:${ANDROID_HOME}/emulator:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools:$GRADLE_HOME/bin:/opt/gradlew:${PATH}
+RUN mkdir ~/.android && echo '### User Sources for Android SDK Manager' > ~/.android/repositories.cfg
+RUN yes | sdkmanager --licenses && sdkmanager --update
+# Update SDK manager and install system image, platform and build tools
+RUN sdkmanager \
+  "tools" \
+  "platform-tools" \
+  "emulator" \
+  "extras;android;m2repository" \
+  "extras;google;m2repository" \
+  "extras;google;google_play_services"
+# API_LEVEL string gets replaced by m4
+RUN sdkmanager "build-tools;28.0.0" && sdkmanager "platforms;android-23" 
+######## This is for customize the comtainer for user
+# install openjdk 11 for jenkins remote via ssh.
+RUN mkdir -p /opt/openjdk/openjdk-11 && \
+    wget https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz -P /opt/openjdk/openjdk-11 && \
+    tar -xzvf /opt/openjdk/openjdk-11/openjdk-11.0.2_linux-x64_bin.tar.gz -C /opt/openjdk/openjdk-11 && \
+    rm -rf /opt/openjdk/openjdk-11/openjdk-11.0.2_linux-x64_bin.tar.gz
+# setting svc_cpmshint account for git configuration 
+RUN wget http://10.80.105.183/download/docker/svc_cpmshint_ssh.tar.gz -P /root && tar -xzvf /root/svc_cpmshint_ssh.tar.gz -C /root/ && \
+    mv /root/ssh /root/.ssh && cp /root/.ssh/gitconfig  /root/.gitconfig && rm /root/svc_cpmshint_ssh.tar.gz
+# Setting sshd service for permit root login and change root password
+RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && echo 'root:123456' | chpasswd 
+# install harman repo command for the container.
+RUN curl -SL http://10.80.105.183/download/docker/repo -o /usr/bin/repo && chmod +x /usr/bin/repo
+# start sshd service when container start
+RUN service ssh start
+EXPOSE 22
+CMD ["/usr/sbin/sshd","-D"]
