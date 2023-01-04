@@ -31,5 +31,5 @@ sed -i 's/(git)/(git zsh-autosuggestions  zsh-syntax-highlighting)/g' ./.zshrc
 sed -i 's/robbyrussell/aussiegeek/g' ./.zshrc
 echo "export EDITOR='vim'" >> ./.zshrc
 echo "export VISUAL='vim'" >> ./.zshrc
-zsh
+chsh -s $(which zsh) #You must log out from your user session and log back in to see this change.
 ```
