@@ -1,0 +1,63 @@
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "/var/log/v2ray/access.log", // 这是 Linux 的路径
+    "error": "/var/log/v2ray/error.log"
+  },
+  "inbounds": [
+    {
+      "port": 12000,
+      "listen":"127.0.0.1",//只监听 127.0.0.1，避免除本机外的机器探测到开放了 10000 端口
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "b831381d-6324-4d53-ad4f-8cda48b30810",  // used
+            "alterId": 0
+          },
+          {
+            "id": "b831381d-6324-4d53-ad4f-8cda48b31811",  // used
+            "alterId": 0
+          },
+          {
+            "id": "b831381d-6324-4d53-ad4f-8cda48b30812",  // used
+            "alterId": 0
+          },
+          {
+            "id": "b831381d-6324-4d53-ad4f-8cda48b30813",  // one month
+            "alterId": 0
+          },
+          {
+            "id": "b831381d-6324-4d53-ad4f-8cda48b30814",  // one month
+            "alterId": 0
+          },
+          {
+            "id": "15cf9a76-cdaf-4d26-86ab-fa92749b4033",  // three month
+            "alterId": 0
+          },
+          {
+            "id": "5d91dc64-5c5d-49e1-8d66-9b42923a55bc", // six month
+            "alterId": 0
+          },
+          {
+            "id": "8f57ab0d-01c3-4a1a-bcc0-916beac294a3", // luogeshibu
+            "alterId": 0
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+        "path": "/ray"
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    }
+  ]
+}
+
